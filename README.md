@@ -8,8 +8,8 @@ container and the routing rules that tie site domains to those containers.
 ## Layout
 
 - `Caddyfile` — one block per site, each reverse-proxying to that site's container by service name
-- `docker-compose.yml` — runs the Caddy container and creates the `caddy-net` Docker network that
-  site containers attach to
+- `docker-compose.yml` — runs the Caddy container on the shared `caddy-net` Docker network that
+  site containers also attach to; the network itself is external (created once, owned by no stack)
 
 ## Adding a new site
 
@@ -20,10 +20,11 @@ container and the routing rules that tie site domains to those containers.
 ## First-time server setup
 
 ```
+docker network create caddy-net   # skip if it already exists
 mkdir -p /path/to/server-config && cd /path/to/server-config
 # copy Caddyfile + docker-compose.yml here, or let the first CI deploy do it
 docker compose up -d
 ```
 
-Site stacks depend on `caddy-net` already existing, so this stack should be brought up before any
-site stacks that reference it.
+Both this stack and the site stacks reference `caddy-net` as external, so the network must exist
+before any of them start (the CI deploy also creates it if missing).

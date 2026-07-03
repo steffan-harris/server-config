@@ -41,5 +41,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd "${{ secrets.DEPLOY_PATH }}"
+            docker network inspect caddy-net >/dev/null 2>&1 || docker network create caddy-net
             docker compose up -d
-            docker exec $(docker compose ps -q caddy) caddy reload --config /etc/caddy/Caddyfile
+            docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
