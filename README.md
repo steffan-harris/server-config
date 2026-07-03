@@ -1,7 +1,7 @@
 # server-config
 
 Shared [Caddy](https://caddyserver.com/) reverse-proxy config for everything hosted on the Hetzner
-server. Each site (e.g. [steffan.lol](https://github.com/Steffan-Harris/steffan.lol)) lives in its
+server. Each site (e.g. [steffan.lol](https://github.com/steffan-harris/steffan.lol)) lives in its
 own repo and ships its own container image + `docker-compose.yml`; this repo only owns the Caddy
 container and the routing rules that tie site domains to those containers.
 
