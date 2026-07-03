@@ -1,0 +1,25 @@
+# Run this as its own stack on the Hetzner server (e.g. docker compose -p server-config up -d).
+# Site containers (steffan-lol, etc.) join the caddy-net network created here
+# via `networks: { caddy-net: { external: true } }` in their own compose files.
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - caddy-net
+
+networks:
+  caddy-net:
+    name: caddy-net
+
+volumes:
+  caddy_data:
+  caddy_config:

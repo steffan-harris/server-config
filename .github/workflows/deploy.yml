@@ -1,0 +1,45 @@
+# Deploys the shared Caddy config to the Hetzner server.
+#
+# Required repo secrets (Settings > Secrets and variables > Actions):
+#   SSH_HOST          Hetzner server IP or hostname
+#   SSH_USER          SSH user with docker access on the server
+#   SSH_PRIVATE_KEY   Private key for a deploy-only SSH keypair
+#   DEPLOY_PATH       Absolute path to this stack's directory on the server
+
+name: Deploy Caddy config
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Copy config to server
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "Caddyfile,docker-compose.yml"
+          target: ${{ secrets.DEPLOY_PATH }}
+
+      - name: Apply and reload
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd "${{ secrets.DEPLOY_PATH }}"
+            docker compose up -d
+            docker exec $(docker compose ps -q caddy) caddy reload --config /etc/caddy/Caddyfile

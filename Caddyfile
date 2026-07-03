@@ -1,0 +1,23 @@
+{
+	email contact@steffan.lol
+}
+
+steffan.lol, www.steffan.lol {
+	reverse_proxy steffan-lol:80
+}
+
+pet-dashboard.steffan.lol {
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy pet-dashboard-backend:4000
+	}
+
+	handle /health {
+		reverse_proxy pet-dashboard-backend:4000
+	}
+
+	handle {
+		reverse_proxy pet-dashboard-webapp:80
+	}
+}
